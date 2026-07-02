@@ -364,6 +364,41 @@ export const ideasService = {
     }
   },
 
+  getRecentActivity: async (): Promise<any[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('idea_status_history')
+        .select(`
+          id,
+          status,
+          created_at,
+          notes,
+          ideas (
+            title
+          ),
+          profiles (
+            full_name
+          )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      return (data || []).map((row: any) => ({
+        id: row.id,
+        status: row.status,
+        createdAt: new Date(row.created_at).toLocaleDateString(),
+        timeAgo: 'Recently', // Simplified or dynamic formatting
+        notes: row.notes,
+        ideaTitle: row.ideas?.title || 'Unknown Proposal',
+        changedBy: row.profiles?.full_name || 'System'
+      }));
+    } catch (err) {
+      console.error('ideasService: Error fetching recent activity:', err);
+      return [];
+    }
+  },
+
   subscribe: (listener: () => void): (() => void) => {
     ideaListeners.add(listener);
     return () => {

@@ -13,6 +13,12 @@ All notable project changes should be documented here.
 - Refined empty state panels in `MyIdeas.tsx`, `Department.tsx`, and `Dashboard.tsx` with clean, minimal layout cards and context-aware action buttons (e.g. "Clear Filters", "Submit Idea").
 - Updated repository seed configs to register the final clean list of 10 club departments (`IIC`, `STARTUP`, `EVENTS`, `OPERATION`, `CREATIVE`, `MEDIA`, `SPONSORSHIP`, `PR`, `MARKETING`, `TECHNICAL`).
 - Configured dynamic department loading in the Submit Idea form (`SubmitIdea.tsx`), completely replacing the old hardcoded department classifications.
+- Fixed a bug where reloading the client page prematurely triggered the auth state listener with a null session on page refresh, resulting in a flash redirect back to the login screen.
+- Restructured `App.tsx` to maintain a single unified `HashRouter` shell context, preventing unmounting state loss and preserving URL history on page refresh.
+- Wiped hardcoded mock data in the `Dashboard` Activity Feed and `Department` stats panels, replacing them with live database-driven queries.
+- Removed the password-based Security & Account tab and redundant email notifications settings in `Settings.tsx` since authentication is purely Google-OAuth-driven.
+- Configured first-login auto-promotion to Administrator when the database is empty, allowing project leads to instantly claim the admin role on fresh deployments.
+- Redesigned the Submit Idea page (`SubmitIdea.tsx`) for a zero-scroll experience by moving save/submit buttons to the header, removing asset uploads, converting departments to a compact dropdown, and optimizing layout height.
 - Added premium HSL color-coded badge styles and solid left-accent vertical bars on idea cards (`MyIdeas.tsx`) to dynamically represent each department across all main views.
 - Integrated a "My Ideas Only" checkbox toggle and a dynamic Department select dropdown filter on the Explore Ideas page to allow cross-department searching and coordination.
 

@@ -6,6 +6,24 @@ console.log('auth.ts: Initializing module');
 let activeUser: User | null = null;
 let initialized = false;
 
+const hasLocalSession = (): boolean => {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.includes('auth-token') || key.startsWith('sb-'))) {
+        const val = localStorage.getItem(key);
+        if (val) {
+          const parsed = JSON.parse(val);
+          return !!(parsed && (parsed.access_token || parsed.user || parsed.currentSession));
+        }
+      }
+    }
+  } catch (e) {
+    console.error('auth.ts: Error checking local storage session:', e);
+  }
+  return false;
+};
+
 const authListeners = new Set<(user: User | null) => void>();
 
 // Helper to map DB role to UI role
@@ -20,6 +38,11 @@ const mapDbRoleToFrontend = (dbRole: string): string => {
       return 'Junior Member';
   }
 };
+
+const ADMIN_EMAILS = [
+  // Add your email address here to be automatically promoted to Administrator
+  'saumitrap33@gmail.com',
+];
 
 // Check if a profile exists, if not create it, and return the profile role
 const ensureProfileExists = async (supabaseUser: any): Promise<{ role: string }> => {
@@ -36,9 +59,31 @@ const ensureProfileExists = async (supabaseUser: any): Promise<{ role: string }>
       return { role: 'junior_member' };
     }
 
+    const isExplicitAdmin = supabaseUser.email && ADMIN_EMAILS.includes(supabaseUser.email.toLowerCase());
+
     if (!profile) {
       console.log('auth.ts: No profile found. Creating public.profiles row...');
-      const defaultRole = 'junior_member';
+      
+      // Count existing profiles to see if this is the first one
+      let defaultRole = 'junior_member';
+      try {
+        const { count, error: countError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+        
+        if (!countError && count === 0) {
+          defaultRole = 'administrator';
+          console.log('auth.ts: First user detected. Auto-assigning administrator role.');
+        }
+      } catch (err) {
+        console.error('auth.ts: Error checking user count:', err);
+      }
+
+      if (isExplicitAdmin) {
+        defaultRole = 'administrator';
+        console.log('auth.ts: Auto-assigning administrator role from ADMIN_EMAILS list.');
+      }
+
       const nowString = new Date().toISOString();
       const { error: insertError } = await supabase.from('profiles').insert({
         id: supabaseUser.id,
@@ -57,6 +102,17 @@ const ensureProfileExists = async (supabaseUser: any): Promise<{ role: string }>
     }
 
     console.log('auth.ts: Found profile role:', profile.role);
+    
+    // Promote user if they are in the explicit admin list but not marked as admin in DB yet
+    if (isExplicitAdmin && profile.role !== 'administrator') {
+      console.log('auth.ts: Promoting existing user to administrator via ADMIN_EMAILS config.');
+      await supabase
+        .from('profiles')
+        .update({ role: 'administrator' })
+        .eq('id', supabaseUser.id);
+      return { role: 'administrator' };
+    }
+
     return { role: profile.role };
   } catch (err) {
     console.error('auth.ts: Unhandled exception checking user profile:', err);
@@ -109,36 +165,59 @@ const handleAuthUserChange = async (supabaseUser: any) => {
         departmentId: deptDetails.id,
         departmentName: deptDetails.name,
       };
+      initialized = true;
     } else {
       activeUser = null;
+      if (!hasLocalSession() || initialized) {
+        initialized = true;
+      }
     }
   } catch (err) {
     console.error('auth.ts: Error in handleAuthUserChange:', err);
     activeUser = null;
-  } finally {
     initialized = true;
-    console.log('auth.ts: Module fully initialized. Active user email:', activeUser?.email || 'None');
-    authListeners.forEach(listener => {
-      try {
-        listener(activeUser);
-      } catch (listenerErr) {
-        console.error('auth.ts: Error in auth listener call:', listenerErr);
-      }
-    });
+  } finally {
+    console.log('auth.ts: Module initialized status:', initialized, 'Active user email:', activeUser?.email || 'None');
+    if (initialized || activeUser) {
+      authListeners.forEach(listener => {
+        try {
+          listener(activeUser);
+        } catch (listenerErr) {
+          console.error('auth.ts: Error in auth listener call:', listenerErr);
+        }
+      });
+    }
   }
 };
 
+let sessionRestorePromise: Promise<void> | null = null;
+
 // Handle initial session restoration explicitly on startup
-const initializeSession = async () => {
-  console.log('auth.ts: initializeSession check starting...');
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    console.log('auth.ts: getSession completed. Session found:', !!session);
-    await handleAuthUserChange(session?.user || null);
-  } catch (err) {
-    console.error('auth.ts: Failed to restore initial session:', err);
-    await handleAuthUserChange(null);
-  }
+const initializeSession = () => {
+  if (sessionRestorePromise) return sessionRestorePromise;
+  
+  sessionRestorePromise = (async () => {
+    console.log('auth.ts: initializeSession check starting...');
+    let sessionFound = false;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('auth.ts: getSession completed. Session found:', !!session);
+      sessionFound = !!session;
+      await handleAuthUserChange(session?.user || null);
+    } catch (err) {
+      console.error('auth.ts: Failed to restore initial session:', err);
+      await handleAuthUserChange(null);
+    } finally {
+      const isExchanging = typeof window !== 'undefined' && window.location.search.includes('code=');
+      if (!initialized && !sessionFound && !isExchanging) {
+        console.log('auth.ts: Session check completed. Forcing initialized to true.');
+        initialized = true;
+        authListeners.forEach(listener => listener(activeUser));
+      }
+    }
+  })();
+  
+  return sessionRestorePromise;
 };
 
 initializeSession();
@@ -147,14 +226,22 @@ initializeSession();
 setTimeout(() => {
   if (!initialized) {
     console.warn('auth.ts: Initialization timeout (2.5s) reached. Forcing session restore resolution.');
-    handleAuthUserChange(null);
+    initialized = true;
+    authListeners.forEach(listener => listener(activeUser));
   }
 }, 2500);
 
 // Listen to Supabase Auth changes
 supabase.auth.onAuthStateChange(async (event, session) => {
   console.log('auth.ts: onAuthStateChange event fired:', event);
-  await handleAuthUserChange(session?.user || null);
+  
+  if (sessionRestorePromise) {
+    await sessionRestorePromise;
+  }
+  
+  if (event !== 'INITIAL_SESSION') {
+    await handleAuthUserChange(session?.user || null);
+  }
 });
 
 export const auth = {

@@ -26,33 +26,29 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return (
-      <HashRouter>
+  return (
+    <HashRouter>
+      {!user ? (
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
-      </HashRouter>
-    );
-  }
-
-  return (
-    <HashRouter>
-      <Layout>
-        <Routes>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/submit" element={<SubmitIdea />} />
-          <Route path="/ideas" element={<MyIdeas />} />
-          <Route path="/ideas/:id" element={<IdeaDetails />} />
-          <Route path="/department" element={<Department />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/settings" element={<Settings />} />
-          {/* Prevent logged-in users from seeing the login route and send them to dashboard */}
-          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </Layout>
+      ) : (
+        <Layout>
+          <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/submit" element={<SubmitIdea />} />
+            <Route path="/ideas" element={<MyIdeas />} />
+            <Route path="/ideas/:id" element={<IdeaDetails />} />
+            <Route path="/department" element={<Department />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/settings" element={<Settings />} />
+            {/* Prevent logged-in users from seeing the login route and send them to dashboard */}
+            <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </Layout>
+      )}
     </HashRouter>
   );
 }

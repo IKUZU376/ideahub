@@ -11,6 +11,7 @@ export function Dashboard() {
   const navigate = useNavigate();
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [stats, setStats] = useState({ total: 0, activeReviews: 0, implemented: 0, collaboration: 0 });
+  const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,12 +19,14 @@ export function Dashboard() {
     const fetchData = async () => {
       try {
         setError(null);
-        const [fetchedIdeas, fetchedStats] = await Promise.all([
+        const [fetchedIdeas, fetchedStats, fetchedActivities] = await Promise.all([
           ideasService.getIdeas({ limit: 3 }),
-          ideasService.getStats()
+          ideasService.getStats(),
+          ideasService.getRecentActivity()
         ]);
         setIdeas(fetchedIdeas);
         setStats(fetchedStats);
+        setActivities(fetchedActivities);
       } catch (err: any) {
         console.error('Dashboard: Error loading dashboard data:', err);
         setError(err.message || 'Failed to load dashboard data.');
@@ -200,24 +203,23 @@ export function Dashboard() {
           <div className="bg-bg-surface/50 border border-border-subtle/50 rounded-2xl p-5 flex-1 glass-card shadow-xl">
             <h3 className="font-display font-bold text-base text-text-primary mb-4">Activity Feed</h3>
             <div className="space-y-5 relative before:absolute before:inset-0 before:left-[11px] before:-translate-x-px before:h-full before:w-[1px] before:bg-border-subtle">
-              <div className="relative flex items-start gap-4">
-                <div className="w-6 h-6 rounded-full bg-primary-transparent border border-primary/30 flex items-center justify-center shrink-0 z-10">
-                  <Activity size={10} className="text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-text-primary leading-relaxed"><span className="font-semibold text-text-primary">Meera I.</span> assigned Operations to the fest command center</p>
-                  <p className="text-[10px] text-text-secondary/70 mt-1">10 mins ago</p>
-                </div>
-              </div>
-              <div className="relative flex items-start gap-4">
-                <div className="w-6 h-6 rounded-full bg-success/15 border border-success/20 flex items-center justify-center shrink-0 z-10">
-                  <Clock size={10} className="text-success" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-text-primary leading-relaxed"><span className="font-semibold text-text-primary">Admin Coordinator</span> approved the sponsor outreach tracker</p>
-                  <p className="text-[10px] text-text-secondary/70 mt-1">45 mins ago</p>
-                </div>
-              </div>
+              {activities.length === 0 ? (
+                <p className="text-xs text-text-secondary py-4 pl-4">No recent activity recorded yet.</p>
+              ) : (
+                activities.map((activity) => (
+                  <div key={activity.id} className="relative flex items-start gap-4">
+                    <div className="w-6 h-6 rounded-full bg-primary-transparent border border-primary/30 flex items-center justify-center shrink-0 z-10">
+                      <Activity size={10} className="text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-text-primary leading-relaxed">
+                        <span className="font-semibold text-text-primary">{activity.changedBy}</span> changed proposal <span className="italic">"{activity.ideaTitle}"</span> status to <span className="font-medium text-primary">{activity.status}</span>
+                      </p>
+                      <p className="text-[10px] text-text-secondary/70 mt-1">{activity.createdAt}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
