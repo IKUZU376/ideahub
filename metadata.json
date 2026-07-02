@@ -1,0 +1,6 @@
+{
+  "name": "IdeaHub",
+  "description": "A college entrepreneurship platform to submit, track, and manage ideas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

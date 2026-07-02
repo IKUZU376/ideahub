@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg-base: #030306;
+  --color-bg-surface: #111118;
+  --color-bg-elevated: #1d1d2b;
+  --color-border-subtle: #222233;
+  --color-border-strong: #383857;
+  
+  --color-primary: #7c3aed;
+  --color-primary-hover: #8b5cf6;
+  --color-primary-transparent: rgba(124, 58, 237, 0.1);
+  
+  --color-text-primary: #f5f5f7;
+  --color-text-secondary: #9ea0c2;
+  
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  --font-display: "Hanken Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom Scrollbar for Dark Mode */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-base); 
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-bg-elevated); 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong); 
+}
+
+/* Premium UI Utility Styles (Tailwind v4 style utilities) */
+@utility glass-card {
+  background: rgba(22, 22, 33, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(124, 58, 237, 0.28);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.65), 0 0 15px -3px rgba(124, 58, 237, 0.04);
+}
+
+@utility glass-panel {
+  background: rgba(3, 3, 6, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+@utility glow-accent {
+  box-shadow: 0 0 35px -5px rgba(124, 58, 237, 0.12);
+}
+
+@utility glow-accent-strong {
+  box-shadow: 0 0 45px -5px rgba(124, 58, 237, 0.22);
+}
+
+@utility hover-lift {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.8), 0 0 25px -5px rgba(124, 58, 237, 0.3);
+    border-color: rgba(124, 58, 237, 0.55);
+  }
+}
+
+@utility input-glow {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary-hover);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
+  }
+}
+
+@utility animate-pulse-glow {
+  animation: pulse-glow 2s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(124, 58, 237, 0.15);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.45);
+  }
+}
