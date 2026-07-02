@@ -12,5 +12,6 @@ insert into public.departments (name, description) values
   ('SPONSORSHIP', 'Sponsorship outreach and corporate partnerships'),
   ('PR', 'Public relations, external communication, and outreach'),
   ('MARKETING', 'Marketing strategy, campaigns, and audience engagement'),
-  ('TECHNICAL', 'Software development, website management, and technical support')
+  ('TECHNICAL', 'Software development, website management, and technical support'),
+  ('DOCUMENTATION', 'Report compilation, proposal archiving, and written history logs')
 on conflict (name) do nothing;

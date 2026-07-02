@@ -21,6 +21,8 @@ export const getDepartmentBadgeColor = (deptName: string): string => {
       return 'bg-fuchsia-500/10 border-fuchsia-500/30 text-fuchsia-300';
     case 'TECHNICAL':
       return 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300';
+    case 'DOCUMENTATION':
+      return 'bg-orange-500/10 border-orange-500/30 text-orange-300';
     default:
       return 'bg-bg-elevated/70 border-border-subtle text-text-secondary';
   }
@@ -49,6 +51,8 @@ export const getDepartmentColorClass = (deptName: string): string => {
       return 'bg-fuchsia-500';
     case 'TECHNICAL':
       return 'bg-cyan-500';
+    case 'DOCUMENTATION':
+      return 'bg-orange-500';
     default:
       return 'bg-primary';
   }
