@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { profilesService } from '../services/profiles';
 import { ideasService } from '../services/ideas';
 import { User, Idea } from '../types';
-import { AlertCircle, Download, Lightbulb, Search, UserPlus, Users, AlertTriangle } from 'lucide-react';
+import { AlertCircle, Lightbulb, Search, UserPlus, Users, AlertTriangle } from 'lucide-react';
 
 export function Admin() {
   const { user: currentUser } = useAuth();
@@ -25,6 +25,15 @@ export function Admin() {
   const [modalRole, setModalRole] = useState('Junior Member');
   const [modalDeptId, setModalDeptId] = useState('none');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isInviteModalOpen, setInviteModalOpen] = useState(false);
+  const [inviteName, setInviteName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('Junior Member');
+  const [inviteDept, setInviteDept] = useState('Technical');
+  const [saveConfirmation, setSaveConfirmation] = useState<{
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   // States
   const [loading, setLoading] = useState(true);
@@ -69,37 +78,9 @@ export function Admin() {
     }
   }, [selectedEditUser]);
 
-  const handleSaveChanges = async () => {
+  const executeSaveChanges = async () => {
     if (!selectedEditUser) return;
-    
-    // Safety check: prevent self-demotion
-    if (selectedEditUser.id === currentUser?.id && modalRole !== 'Administrator') {
-      alert("Self-demotion is not allowed. You cannot remove your own Administrator role.");
-      return;
-    }
-
-    // Safety check: prevent removing the last Administrator
-    if (selectedEditUser.role === 'Administrator' && modalRole !== 'Administrator') {
-      const adminCount = users.filter(u => u.role === 'Administrator').length;
-      if (adminCount <= 1) {
-        alert("Action blocked. System must have at least one active Administrator.");
-        return;
-      }
-    }
-
-    // Safety check: verify changing roles
-    if (modalRole !== selectedEditUser.role) {
-      const confirmRole = window.confirm(`Are you sure you want to change ${selectedEditUser.name}'s role from ${selectedEditUser.role} to ${modalRole}?`);
-      if (!confirmRole) return;
-    }
-
-    // Safety check: verify changing departments
     const currentDeptIdVal = selectedEditUser.departmentId || 'none';
-    if (modalDeptId !== currentDeptIdVal) {
-      const confirmDept = window.confirm(`Are you sure you want to change ${selectedEditUser.name}'s department assignment?`);
-      if (!confirmDept) return;
-    }
-
     setIsSubmitting(true);
     setActionFeedback(null);
 
@@ -115,40 +96,91 @@ export function Admin() {
         await profilesService.updateUserDepartment(selectedEditUser.id, finalDeptId);
       }
 
-      setActionFeedback({ type: 'success', message: `Successfully updated ${selectedEditUser.name}'s profile details.` });
+      setActionFeedback({ type: 'success', message: `Profile details for ${selectedEditUser.name} updated successfully.` });
       setSelectedEditUser(null);
     } catch (err: any) {
       console.error('Admin: Error updating user profile:', err);
       setActionFeedback({ type: 'danger', message: err.message || 'Failed to update user profile.' });
     } finally {
       setIsSubmitting(false);
-      // Reload profile users list
       const refreshedUsers = await profilesService.getUsers();
       setUsers(refreshedUsers);
     }
   };
 
-  const handleInviteUser = async () => {
-    const name = prompt("Enter new user's Full Name:");
-    if (!name?.trim()) return;
-    
-    const email = prompt("Enter Email address:");
-    if (!email?.trim()) return;
-    
-    const role = prompt("Enter Club Role (Junior Member, Department Head, Administrator):", "Junior Member");
-    if (!role?.trim()) return;
-    
-    const department = prompt("Enter Department (Events, Content, PR, Operations, Technical):", "Technical");
-    if (!department?.trim()) return;
+  const handleSaveChanges = () => {
+    if (!selectedEditUser) return;
 
+    // Safety check: prevent self-demotion
+    if (selectedEditUser.id === currentUser?.id && modalRole !== 'Administrator') {
+      setActionFeedback({ type: 'danger', message: "Self-demotion is not allowed. You cannot remove your own Administrator role." });
+      return;
+    }
+
+    // Safety check: prevent removing the last Administrator
+    if (selectedEditUser.role === 'Administrator' && modalRole !== 'Administrator') {
+      const adminCount = users.filter(u => u.role === 'Administrator').length;
+      if (adminCount <= 1) {
+        setActionFeedback({ type: 'danger', message: "Action blocked. System must have at least one active Administrator." });
+        return;
+      }
+    }
+
+    // Build confirmation message if changes are made
+    let confirmMsg = '';
+    const currentDeptIdVal = selectedEditUser.departmentId || 'none';
+
+    if (modalRole !== selectedEditUser.role && modalDeptId !== currentDeptIdVal) {
+      confirmMsg = `Are you sure you want to change ${selectedEditUser.name}'s role to ${modalRole} and update their department assignment?`;
+    } else if (modalRole !== selectedEditUser.role) {
+      confirmMsg = `Are you sure you want to change ${selectedEditUser.name}'s role from ${selectedEditUser.role} to ${modalRole}?`;
+    } else if (modalDeptId !== currentDeptIdVal) {
+      confirmMsg = `Are you sure you want to change ${selectedEditUser.name}'s department assignment?`;
+    }
+
+    if (confirmMsg) {
+      setSaveConfirmation({
+        message: confirmMsg,
+        onConfirm: () => executeSaveChanges()
+      });
+    } else {
+      executeSaveChanges();
+    }
+  };
+
+  const handleInviteUser = () => {
+    setInviteName('');
+    setInviteEmail('');
+    setInviteRole('Junior Member');
+    setInviteDept('Technical');
+    setActionFeedback(null);
+    setInviteModalOpen(true);
+  };
+
+  const executeInviteUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteName.trim() || !inviteEmail.trim()) {
+      setActionFeedback({ type: 'danger', message: 'Name and email are required.' });
+      return;
+    }
+
+    setIsSubmitting(true);
     setActionFeedback(null);
     try {
-      await profilesService.inviteUser(name.trim(), email.trim(), role.trim(), department.trim());
-      setActionFeedback({ type: 'success', message: `Successfully invited and registered ${name}!` });
+      await profilesService.inviteUser(
+        inviteName.trim(), 
+        inviteEmail.trim(), 
+        inviteRole.trim(), 
+        inviteDept.trim()
+      );
+      setActionFeedback({ type: 'success', message: `Invitation sent to ${inviteName.trim()} successfully.` });
+      setInviteModalOpen(false);
       const refreshedUsers = await profilesService.getUsers();
       setUsers(refreshedUsers);
     } catch (err: any) {
       setActionFeedback({ type: 'danger', message: err.message || 'Failed to invite user.' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -232,12 +264,9 @@ export function Admin() {
           <p className="text-text-secondary text-sm mt-1 leading-relaxed">Oversee members, permissions, department queues, and idea lifecycle progress.</p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 border border-border-strong rounded-xl text-xs font-semibold hover:border-primary/50 hover-lift transition-colors flex items-center gap-2 cursor-pointer focus:outline-none bg-bg-surface/50">
-            <Download size={14} /> Export Data
-          </button>
           <button 
             onClick={handleInviteUser}
-            className="px-4 py-2 bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white rounded-xl text-xs font-bold hover-lift transition-all flex items-center gap-2 cursor-pointer focus:outline-none shadow-lg shadow-primary/10"
+            className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer focus:outline-none shadow-lg shadow-primary/10 hover-lift"
           >
             <UserPlus size={14} /> Invite User
           </button>
@@ -247,7 +276,7 @@ export function Admin() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className="bg-bg-surface/50 rounded-2xl p-6 border border-border-subtle/60 glass-card shadow-lg hover-lift relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary to-primary-hover" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary" />
           <div className="flex justify-between items-start mb-4">
             <div className="w-9 h-9 rounded-xl bg-primary-transparent text-primary flex items-center justify-center">
               <Users size={18} />
@@ -260,7 +289,7 @@ export function Admin() {
         </div>
         
         <div className="bg-bg-surface/50 rounded-2xl p-6 border border-border-subtle/60 glass-card shadow-lg hover-lift relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-warning to-amber-400" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-warning" />
           <div className="flex justify-between items-start mb-4">
             <div className="w-9 h-9 rounded-xl bg-warning/10 text-warning flex items-center justify-center">
               <Lightbulb size={18} />
@@ -273,7 +302,7 @@ export function Admin() {
         </div>
 
         <div className="bg-bg-surface/50 rounded-2xl p-6 border border-border-subtle/60 glass-card shadow-lg hover-lift relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-danger to-rose-400" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-danger" />
           <div className="flex justify-between items-start mb-4">
             <div className="w-9 h-9 rounded-xl bg-danger/10 text-danger flex items-center justify-center">
               <AlertCircle size={18} />
@@ -351,7 +380,7 @@ export function Admin() {
           {paginatedUsers.length === 0 ? (
             <div className="p-12 text-center text-text-secondary text-sm">No members found matching your search.</div>
           ) : (
-            <table className="w-full text-left border-collapse">
+            <table className="w-full min-w-[700px] text-left border-collapse">
               <thead className="bg-bg-base/40 text-text-secondary/70 text-[10px] uppercase tracking-wider font-semibold">
                 <tr>
                   <th className="px-6 py-3 font-semibold">Name</th>
@@ -425,8 +454,8 @@ export function Admin() {
 
       {/* Edit User Modal Dialog */}
       {selectedEditUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg-base/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-bg-surface/90 border border-border-subtle rounded-2xl p-6 glass-card shadow-2xl relative animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-bg-base/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-bg-surface/90 border border-border-subtle rounded-2xl p-6 pb-8 glass-card shadow-2xl relative animate-in zoom-in-95 duration-200">
             <h3 className="font-display font-bold text-lg text-text-primary mb-4">Edit User Profile</h3>
             
             <div className="flex items-center gap-3.5 mb-6 p-3 bg-bg-elevated/20 rounded-xl border border-border-subtle/40">
@@ -479,13 +508,119 @@ export function Admin() {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white rounded-xl text-xs font-bold hover-lift transition-all shadow-lg shadow-primary/10 cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                  className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-primary/10 cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                 >
                   {isSubmitting && <div className="w-3.5 h-3.5 border border-white/20 border-t-white rounded-full animate-spin" />}
                   {isSubmitting ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Invite User Modal Dialog */}
+      {isInviteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-bg-base/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-bg-surface/90 border border-border-subtle rounded-2xl p-6 pb-8 glass-card shadow-2xl relative animate-in zoom-in-95 duration-200">
+            <h3 className="font-display font-bold text-lg text-text-primary mb-4">Invite New User</h3>
+            
+            <form onSubmit={executeInviteUser} className="space-y-5">
+              <div>
+                <label className="block text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Full Name</label>
+                <input 
+                  type="text" 
+                  value={inviteName}
+                  onChange={(e) => setInviteName(e.target.value)}
+                  placeholder="e.g., Jane Doe"
+                  className="w-full bg-bg-base/60 border border-border-strong/70 rounded-xl px-3.5 py-2.5 text-xs text-text-primary placeholder:text-text-secondary/50 input-glow transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Email Address</label>
+                <input 
+                  type="email" 
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="e.g., jane@club.org"
+                  className="w-full bg-bg-base/60 border border-border-strong/70 rounded-xl px-3.5 py-2.5 text-xs text-text-primary placeholder:text-text-secondary/50 input-glow transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Club Role</label>
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value)}
+                  className="w-full bg-bg-base/60 border border-border-strong/70 rounded-xl px-3.5 py-2.5 text-xs text-text-primary focus:outline-none input-glow cursor-pointer font-semibold"
+                >
+                  <option value="Junior Member">Junior Member</option>
+                  <option value="Department Head">Department Head</option>
+                  <option value="Administrator">Administrator</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">Department Assignment</label>
+                <select
+                  value={inviteDept}
+                  onChange={(e) => setInviteDept(e.target.value)}
+                  className="w-full bg-bg-base/60 border border-border-strong/70 rounded-xl px-3.5 py-2.5 text-xs text-text-primary focus:outline-none input-glow cursor-pointer font-semibold"
+                >
+                  {dbDepts.map(d => (
+                    <option key={d.id} value={d.name}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-border-subtle/30">
+                <button 
+                  type="button"
+                  onClick={() => setInviteModalOpen(false)}
+                  className="px-4 py-2 border border-border-strong rounded-xl text-xs font-semibold hover:border-primary/50 hover-lift transition-colors cursor-pointer focus:outline-none bg-bg-surface/50 text-text-primary"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-primary/10 cursor-pointer focus:outline-none disabled:opacity-50 flex items-center gap-1.5 hover-lift"
+                >
+                  {isSubmitting && <div className="w-3.5 h-3.5 border border-white/20 border-t-white rounded-full animate-spin" />}
+                  {isSubmitting ? 'Inviting...' : 'Send Invite'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Save Changes Confirmation Modal */}
+      {saveConfirmation && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto bg-bg-base/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-bg-surface border border-border-subtle rounded-2xl p-6 pb-8 glass-card shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="font-display font-bold text-base text-text-primary mb-2">Confirm Changes</h3>
+            <p className="text-xs text-text-secondary leading-relaxed mb-6">
+              {saveConfirmation.message}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setSaveConfirmation(null)}
+                className="px-4 py-2 border border-border-strong rounded-xl text-xs font-semibold hover:border-primary/50 hover-lift transition-colors cursor-pointer bg-bg-surface/50 text-text-primary focus:outline-none"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  saveConfirmation.onConfirm();
+                  setSaveConfirmation(null);
+                }}
+                className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-primary/10 hover-lift cursor-pointer focus:outline-none"
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
       )}

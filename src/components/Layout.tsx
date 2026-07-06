@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { supabase } from '../lib/supabase';
 import { auth } from '../lib/auth';
+import { useLocation } from 'react-router-dom';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,8 +16,14 @@ interface Toast {
 }
 
 export function Layout({ children }: LayoutProps) {
+  const location = useLocation();
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Automatically close mobile sidebar drawer on navigation / route changes
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [location.pathname]);
 
   const addToast = (type: 'idea' | 'comment', message: string) => {
     const id = Date.now().toString() + Math.random().toString();
@@ -65,7 +72,7 @@ export function Layout({ children }: LayoutProps) {
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full bg-bg-base text-text-primary">
+    <div className="flex min-h-screen w-full bg-bg-base text-text-primary overflow-x-hidden">
       {/* Sidebar - handles both desktop and mobile drawer overlay */}
       <Sidebar 
         isOpen={isMobileSidebarOpen} 
@@ -83,7 +90,10 @@ export function Layout({ children }: LayoutProps) {
       <div className="flex-1 flex flex-col md:ml-[240px] w-full min-w-0">
         <Topbar onMenuClick={() => setMobileSidebarOpen(true)} />
         
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 max-w-[1280px] w-full mx-auto">
+        <main 
+          key={location.pathname}
+          className="flex-1 overflow-y-auto p-4 md:p-8 pb-safe pr-safe pl-safe max-w-[1280px] w-full mx-auto animate-fade-in-up"
+        >
           {children}
         </main>
       </div>

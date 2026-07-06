@@ -28,6 +28,7 @@ export function IdeaDetails() {
   const [idea, setIdea] = useState<Idea | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,16 +105,17 @@ export function IdeaDetails() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDeleteDraft = async () => {
-    if (!idea || !idea.id) return;
-    const confirmDelete = window.confirm('Are you sure you want to permanently delete this draft? This action cannot be undone.');
-    if (!confirmDelete) return;
+  const handleDeleteDraft = () => {
+    setShowDeleteModal(true);
+  };
 
+  const executeDeleteDraft = async () => {
+    if (!idea || !idea.id) return;
     try {
       await ideasService.deleteIdea(idea.id);
       navigate('/ideas');
     } catch (err: any) {
-      alert(err.message || 'Failed to delete draft.');
+      console.error('IdeaDetails: Error deleting draft:', err);
     }
   };
 
@@ -256,7 +258,7 @@ export function IdeaDetails() {
               </button>
               <button 
                 onClick={() => handleUpdateStatus('Submitted')}
-                className="px-4 py-2 bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white rounded-xl text-xs font-bold hover-lift transition-all flex items-center gap-2 shadow-lg shadow-primary/10 cursor-pointer focus:outline-none"
+                className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-primary/10 cursor-pointer focus:outline-none"
               >
                 <Play size={14} /> Submit Idea
               </button>
@@ -366,7 +368,7 @@ export function IdeaDetails() {
                   <span className="font-mono text-base font-bold text-text-primary">{idea.votes}</span>
                   <button 
                     onClick={handleVote}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-primary-transparent hover:bg-primary/15 text-primary border border-primary/20 hover:border-primary/45 rounded-lg text-[10px] font-bold transition-all focus:outline-none cursor-pointer"
+                    className="flex items-center gap-1.5 px-3.5 py-2 md:py-1 bg-primary-transparent hover:bg-primary/15 text-primary border border-primary/20 hover:border-primary/45 rounded-lg text-xs md:text-[10px] font-bold transition-all focus:outline-none cursor-pointer h-10 md:h-[28px]"
                   >
                     <ThumbsUp size={11} className="fill-current" /> Upvote
                   </button>
@@ -447,6 +449,32 @@ export function IdeaDetails() {
           </div>
         </div>
       </div>
+
+      {/* Custom Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-bg-base/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-bg-surface border border-border-subtle rounded-2xl p-6 pb-8 glass-card shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="font-display font-bold text-base text-text-primary mb-2">Delete Draft</h3>
+            <p className="text-xs text-text-secondary leading-relaxed mb-6">
+              Are you sure you want to permanently delete this draft? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 border border-border-strong rounded-xl text-xs font-semibold hover:border-primary/50 hover-lift transition-colors cursor-pointer bg-bg-surface/50 text-text-primary focus:outline-none"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeDeleteDraft}
+                className="px-4 py-2 bg-danger hover:bg-danger/90 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-danger/10 hover-lift cursor-pointer focus:outline-none"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

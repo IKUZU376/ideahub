@@ -10,6 +10,7 @@ import { IdeaDetails } from './views/IdeaDetails';
 import { Department } from './views/Department';
 import { Admin } from './views/Admin';
 import { Settings } from './views/Settings';
+import { ThemeProvider } from './context/ThemeContext';
 
 export default function App() {
   const { user, loading } = useAuth();
@@ -27,28 +28,30 @@ export default function App() {
   }
 
   return (
-    <HashRouter>
-      {!user ? (
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      ) : (
-        <Layout>
+    <ThemeProvider>
+      <HashRouter>
+        {!user ? (
           <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/submit" element={<SubmitIdea />} />
-            <Route path="/ideas" element={<MyIdeas />} />
-            <Route path="/ideas/:id" element={<IdeaDetails />} />
-            <Route path="/department" element={<Department />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/settings" element={<Settings />} />
-            {/* Prevent logged-in users from seeing the login route and send them to dashboard */}
-            <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
-        </Layout>
-      )}
-    </HashRouter>
+        ) : (
+          <Layout>
+            <Routes>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/submit" element={<SubmitIdea />} />
+              <Route path="/ideas" element={<MyIdeas />} />
+              <Route path="/ideas/:id" element={<IdeaDetails />} />
+              <Route path="/department" element={<Department />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/settings" element={<Settings />} />
+              {/* Prevent logged-in users from seeing the login route and send them to dashboard */}
+              <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </Layout>
+        )}
+      </HashRouter>
+    </ThemeProvider>
   );
 }

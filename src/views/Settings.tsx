@@ -1,21 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { profilesService } from '../services/profiles';
-import { User, Settings as SettingsIcon, Shield, Camera, Check } from 'lucide-react';
+import { User, Settings as SettingsIcon, Check } from 'lucide-react';
 
 export function Settings() {
   const { user } = useAuth();
 
   const [name, setName] = useState(user?.name || '');
-  const [role, setRole] = useState(user?.role || '');
-  const [bio, setBio] = useState('Coordinating department reviews, implementation planning, and junior member collaboration.');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  const [darkMode, setDarkMode] = useState(true);
-  const [notifyApprove, setNotifyApprove] = useState(true);
-  const [notifyComments, setNotifyComments] = useState(true);
-  const [notifyDigest, setNotifyDigest] = useState(false);
 
   if (!user) {
     return (
@@ -32,8 +25,7 @@ export function Settings() {
     setSaving(true);
     try {
       await profilesService.updateProfile(user.id, {
-        name: name.trim(),
-        role: role.trim()
+        name: name.trim()
       });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -48,7 +40,7 @@ export function Settings() {
     <div className="flex flex-col gap-8 animate-in fade-in duration-500 max-w-4xl mx-auto pb-12">
       <div>
         <h2 className="font-display text-3xl font-extrabold text-text-primary tracking-tight mb-2">Settings</h2>
-        <p className="text-text-secondary text-sm">Manage your member profile, workflow notifications, and security settings.</p>
+        <p className="text-text-secondary text-sm">Manage your profile details and account settings.</p>
       </div>
 
       {/* Profile Section */}
@@ -60,25 +52,10 @@ export function Settings() {
           <p className="text-xs text-text-secondary/80 mt-1 leading-relaxed">This information is visible to club members collaborating on ideas.</p>
         </div>
         <form onSubmit={handleSaveProfile} className="p-6 flex flex-col md:flex-row gap-8 items-start">
-          <div className="w-full md:w-1/4 flex flex-col items-center gap-4">
-            <div className="relative w-24 h-24 rounded-2xl border border-border-subtle overflow-hidden group select-none shadow-md">
+          <div className="w-full md:w-1/4 flex flex-col items-center">
+            <div className="relative w-24 h-24 rounded-2xl border border-border-subtle overflow-hidden shadow-md">
               <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/60 hidden group-hover:flex items-center justify-center cursor-pointer transition-all">
-                <Camera className="text-white" size={24} />
-              </div>
             </div>
-            <button 
-              type="button" 
-              className="w-full py-2 px-4 rounded-xl border border-border-strong text-xs font-semibold hover:border-primary/50 hover:bg-bg-elevated/40 transition-all text-text-primary focus:outline-none cursor-pointer"
-            >
-              Change Avatar
-            </button>
-            <button 
-              type="button" 
-              className="w-full py-2 px-4 rounded-xl text-danger hover:bg-danger/5 text-xs font-semibold transition-all focus:outline-none cursor-pointer"
-            >
-              Remove
-            </button>
           </div>
           
           <div className="w-full md:w-3/4 space-y-5">
@@ -96,9 +73,9 @@ export function Settings() {
                 <label className="block text-xs font-semibold text-text-secondary/80 uppercase tracking-wider mb-2">Club Role</label>
                 <input 
                   type="text" 
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full bg-bg-base/60 border border-border-strong/70 rounded-xl px-4 py-2 text-xs text-text-primary input-glow transition-all" 
+                  value={user.role}
+                  disabled
+                  className="w-full bg-bg-elevated/40 border border-border-strong/50 rounded-xl px-4 py-2 text-xs text-text-secondary cursor-not-allowed opacity-60" 
                 />
               </div>
               <div className="md:col-span-2">
@@ -110,27 +87,18 @@ export function Settings() {
                   className="w-full bg-bg-elevated/40 border border-border-strong/50 rounded-xl px-4 py-2 text-xs text-text-secondary cursor-not-allowed opacity-60" 
                 />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-text-secondary/80 uppercase tracking-wider mb-2">Bio</label>
-                <textarea 
-                  rows={3} 
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  className="w-full bg-bg-base/60 border border-border-strong/70 rounded-xl px-4 py-2 text-xs text-text-primary input-glow transition-all resize-none" 
-                />
-              </div>
             </div>
             
             <div className="flex justify-end items-center gap-3 pt-2">
               {saveSuccess && (
                 <span className="text-success text-xs flex items-center gap-1.5 animate-in fade-in duration-300 font-semibold">
-                  <Check size={14} /> Profile saved!
+                  <Check size={14} /> Profile updated successfully.
                 </span>
               )}
               <button 
                 type="submit" 
                 disabled={saving}
-                className="bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white px-5 py-2.5 rounded-xl text-xs font-bold hover-lift transition-all cursor-pointer focus:outline-none shadow-md shadow-primary/10 disabled:opacity-50 flex items-center gap-1.5"
+                className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer focus:outline-none shadow-md shadow-primary/10 disabled:opacity-50 flex items-center gap-1.5"
               >
                 {saving && <div className="w-3 h-3 border border-white/20 border-t-white rounded-full animate-spin" />}
                 {saving ? 'Saving...' : 'Save Profile'}
@@ -138,48 +106,6 @@ export function Settings() {
             </div>
           </div>
         </form>
-      </section>
-
-      {/* Preferences Section */}
-      <section className="bg-bg-surface/50 border border-border-subtle/50 rounded-2xl overflow-hidden glass-card shadow-xl">
-        <div className="p-6 border-b border-border-subtle/40 bg-bg-surface/30">
-          <h3 className="font-display font-bold text-base flex items-center gap-2.5 text-text-primary">
-            <SettingsIcon className="text-primary" size={18} /> System Preferences
-          </h3>
-          <p className="text-xs text-text-secondary/80 mt-1 leading-relaxed">Customize your interface and notification settings.</p>
-        </div>
-        <div className="divide-y divide-border-subtle/40">
-          <div className="p-6 flex items-center justify-between">
-            <div>
-              <div className="font-semibold text-xs text-text-primary">Dark Mode Focus</div>
-              <div className="text-[10px] text-text-secondary mt-0.5">Use dark theme across all IdeaHub workspaces.</div>
-            </div>
-            <div 
-              onClick={() => setDarkMode(!darkMode)}
-              className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in cursor-pointer"
-            >
-              <input 
-                type="checkbox" 
-                name="toggle" 
-                id="toggle1" 
-                checked={darkMode}
-                readOnly
-                className="hidden"
-              />
-              <div 
-                className={`toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none transition-transform ${
-                  darkMode ? 'translate-x-5' : 'translate-x-0'
-                }`}
-                style={{borderColor: darkMode ? '#7c3aed' : '#3f3f46'}}
-              />
-              <div 
-                className={`toggle-label block overflow-hidden h-5 rounded-full cursor-pointer transition-colors ${
-                  darkMode ? 'bg-primary' : 'bg-bg-elevated'
-                }`}
-              />
-            </div>
-          </div>
-        </div>
       </section>
     </div>
   );

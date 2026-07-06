@@ -131,7 +131,7 @@ export function SubmitIdea() {
           <button 
             onClick={() => handleSave('Submitted')}
             disabled={loading}
-            className="px-4 py-2 bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white font-semibold text-xs hover-lift transition-all flex items-center gap-2 cursor-pointer focus:outline-none shadow-md shadow-primary/10 disabled:opacity-50"
+            className="px-4 py-2 bg-primary hover:bg-primary-hover text-white font-semibold text-xs transition-all flex items-center gap-2 cursor-pointer focus:outline-none shadow-md shadow-primary/10 disabled:opacity-50"
           >
             {loading ? (
               <div className="w-3.5 h-3.5 border border-white/20 border-t-white rounded-full animate-spin" />

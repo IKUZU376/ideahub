@@ -223,3 +223,108 @@ Always coordinate database-level enum structures with frontend application state
 
 ## Draft Deletion Security Validation
 Verified that the newly integrated draft delete button is fully validated against the database RLS policies (`Authorized deletions on ideas`). Standard members are allowed to permanently delete their own draft items, but any unauthorized attempts or deletions on non-draft proposals are securely rejected at the database level.
+
+---
+
+## Issue
+Inputs, buttons, textareas, and select tags do not inherit the `font-family` from the global `body` CSS rule, causing parts of the UI to use generic system fallback fonts instead of the target Geist font.
+
+---
+
+## Cause
+By default, web browsers assign vendor-specific stylesheets to form elements and interactive tags that override inheritance of standard text styles like `font-family`.
+
+---
+
+## Solution
+Use a global CSS reset rule that explicitly forces the font family on all form control elements:
+```css
+body, html, input, select, textarea, button {
+  font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+```
+
+---
+
+## Prevention
+Always include form inputs, selects, textareas, and buttons in global font resets to ensure uniform typography application throughout the user interface.
+
+---
+
+## Issue
+Duplicate theme toggle controls (in Topbar and Settings) can lead to UI desynchronization where the local theme state is out of sync with the global theme selection.
+
+---
+
+## Cause
+Maintaining local component-level states for theme preference (like `const [darkMode, setDarkMode] = useState(true)`) in multiple files results in race conditions or missing update listeners, causing parts of the UI to show incorrect states.
+
+---
+
+## Solution
+Consolidate theme control into a single global context (`ThemeProvider`) and expose it through a hook (`useTheme`). Remove duplicate checkboxes and switches, making the Topbar toggle the single source of truth for the entire application.
+
+---
+
+## Prevention
+Avoid duplicating layout switches across multiple views. Drive global preferences from a unified React Context and expose a single control toggle.
+
+---
+
+## Issue
+Native browser prompt and confirm dialogs (e.g. `window.confirm`, `prompt`) block the browser thread, have poor UX, and do not inherit custom style themes.
+
+---
+
+## Cause
+Using native browser dialogs is a low-fidelity way to handle destructive draft deletes or input configurations, leading to poor visual consistency and blocking browser actions.
+
+---
+
+## Solution
+Replace all native browser alerts, confirms, and prompts with stylized in-app modal overlays (`isInviteModalOpen`, `showDeleteModal`, `saveConfirmation`). Build them with React state variables and style them with consistent Tailwind cards, input forms, and action button components.
+
+---
+
+## Prevention
+Always use custom React overlay modals for confirmation prompts and input fields rather than relying on browser-native blocking alerts.
+
+---
+
+## Issue
+Modal dialogs containing input fields get clipped and confirm/cancel action buttons become obscured when the virtual software keyboard opens on mobile devices.
+
+---
+
+## Cause
+Modals lacking height constraints or vertical scroll overrides become taller than the reduced visible viewport space, causing forms to extend off-screen and blocking form completion.
+
+---
+
+## Solution
+Apply `max-h-[90vh]` limits combined with `overflow-y-auto` scrolling and bottom padding buffers (`pb-8`) to all modal dialog cards. This allows the modal contents to be scrolled freely, keeping action buttons accessible even with the soft keyboard active.
+
+---
+
+## Prevention
+Always set maximum height bounds and vertical scroll bars on modal containers containing input elements.
+
+---
+
+## Issue
+Large data tables containing multiple detailed columns (such as members directories) squish column content on small viewports, rendering text overlays and misaligning action links.
+
+---
+
+## Cause
+Forcing standard HTML tables to scale down to fit screen widths under 768px compresses column cells to unreadable proportions, without triggering natural scrolling.
+
+---
+
+## Solution
+Wrap tabular listings in a smooth scrolling container (`overflow-x-auto`) and set a minimum width limit (`min-w-[700px]`) on the table element. This maintains proper text line heights and columns spacing, enabling fluid horizontal swipe navigation on mobile devices.
+
+---
+
+## Prevention
+Configure tables with minimum width bounds whenever they wrap multi-column directories.

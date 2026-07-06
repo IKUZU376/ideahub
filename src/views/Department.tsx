@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { ideasService } from '../services/ideas';
 import { departmentsService, DepartmentDetails } from '../services/departments';
 import { Idea } from '../types';
-import { Award, Download, Lightbulb, CheckCircle2, Users, AlertTriangle } from 'lucide-react';
+import { Award, Lightbulb, CheckCircle2, Users, AlertTriangle } from 'lucide-react';
 import { getDepartmentBadgeColor } from '../lib/colors';
 
 export function Department() {
@@ -95,15 +95,12 @@ export function Department() {
           <h2 className="font-display text-3xl font-extrabold text-text-primary tracking-tight">Department Overview</h2>
           <p className="text-text-secondary text-sm mt-1 max-w-2xl leading-relaxed">Review submissions, coordinate with other departments, and move approved club ideas into implementation.</p>
         </div>
-        <button className="px-4 py-2 bg-bg-surface border border-border-subtle hover:border-primary-hover rounded-xl text-xs font-semibold hover-lift transition-colors flex items-center gap-2 shrink-0 cursor-pointer focus:outline-none">
-          <Download size={14} /> Export Report
-        </button>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-bg-surface/50 p-6 rounded-2xl border border-border-subtle/60 shadow-lg hover-lift glass-card relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary to-primary-hover" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary" />
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-primary-transparent flex items-center justify-center text-primary">
               <Lightbulb size={18} />
@@ -117,7 +114,7 @@ export function Department() {
         </div>
         
         <div className="bg-bg-surface/50 p-6 rounded-2xl border border-border-subtle/60 shadow-lg hover-lift glass-card relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-success to-emerald-400" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-success" />
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-success/10 flex items-center justify-center text-success">
               <CheckCircle2 size={18} />
@@ -129,9 +126,9 @@ export function Department() {
             <span>+5%</span> <span className="text-text-secondary/70">from last month</span>
           </div>
         </div>
-
+ 
         <div className="bg-bg-surface/50 p-6 rounded-2xl border border-border-subtle/60 shadow-lg hover-lift glass-card relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-warning to-amber-400" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-warning" />
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-warning/10 flex items-center justify-center text-warning">
               <Users size={18} />
@@ -141,9 +138,9 @@ export function Department() {
           <div className="text-3xl font-display font-extrabold tracking-tight text-text-primary">{contributorsCount}</div>
           <div className="text-text-secondary/70 text-[10px] mt-2 font-semibold">Active Team Size</div>
         </div>
-
+ 
         <div className="bg-bg-surface/50 p-6 rounded-2xl border border-border-subtle/60 shadow-lg hover-lift glass-card relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-danger to-rose-400" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-danger" />
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-danger/5 rounded-full blur-xl pointer-events-none"></div>
           <div className="flex items-center gap-3 mb-4 relative z-10">
             <div className="w-9 h-9 rounded-xl bg-danger/10 flex items-center justify-center text-danger">
@@ -171,7 +168,7 @@ export function Department() {
           </div>
           <div className="overflow-x-auto">
             {filteredIdeas.length === 0 ? (
-              <div className="text-center py-16 bg-bg-surface/30 border border-border-subtle/50 rounded-2xl glass-card m-5">
+              <div className="text-center py-16 bg-bg-surface border border-border-subtle/50 rounded-2xl glass-card m-5">
                 <p className="text-text-secondary text-xs font-semibold mb-3">No department proposals found in queue.</p>
                 {searchQuery && (
                   <button 
@@ -183,44 +180,82 @@ export function Department() {
                 )}
               </div>
             ) : (
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-bg-base/40 text-text-secondary/70 text-[10px] uppercase tracking-wider font-semibold">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold">Idea Title</th>
-                    <th className="px-5 py-3 font-semibold">Status</th>
-                    <th className="px-5 py-3 font-semibold">Author</th>
-                    <th className="px-5 py-3 font-semibold text-right">Votes</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-subtle/30 text-xs">
+              <>
+                {/* Desktop Table View */}
+                <table className="hidden md:table w-full text-left border-collapse">
+                  <thead className="bg-bg-base/40 text-text-secondary/70 text-[10px] uppercase tracking-wider font-semibold">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold">Idea Title</th>
+                      <th className="px-5 py-3 font-semibold">Status</th>
+                      <th className="px-5 py-3 font-semibold">Author</th>
+                      <th className="px-5 py-3 font-semibold text-right">Votes</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-subtle/30 text-xs">
+                    {filteredIdeas.map(idea => (
+                      <tr 
+                        key={idea.id} 
+                        onClick={() => navigate(`/ideas/${idea.id}`)} 
+                        className="hover:bg-bg-elevated/20 transition-colors cursor-pointer group"
+                      >
+                        <td className="px-5 py-4">
+                          <div className="font-semibold text-sm group-hover:text-primary transition-colors">{idea.title}</div>
+                          <div className="text-text-secondary/80 text-xs mt-0.5 max-w-xs sm:max-w-md truncate">{idea.description}</div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
+                            idea.status === 'Approved' || idea.status === 'Completed' || idea.status === 'In Implementation' ? 'bg-success/15 border-success/20 text-success' : 
+                            idea.status === 'In Review' ? 'bg-warning/15 border-warning/20 text-warning' : 
+                            'bg-bg-elevated/70 text-text-secondary border-border-subtle'
+                          }`}>
+                            {idea.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 flex items-center gap-2.5 mt-1.5">
+                          <img src={idea.author.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-border-subtle" />
+                          <span className="text-text-secondary">{idea.author.name.split(' ')[0]}</span>
+                        </td>
+                        <td className="px-5 py-4 text-right font-mono text-xs text-text-primary">{idea.votes}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Mobile Stacked Card View */}
+                <div className="block md:hidden divide-y divide-border-subtle/30 px-5 text-xs">
                   {filteredIdeas.map(idea => (
-                    <tr 
-                      key={idea.id} 
-                      onClick={() => navigate(`/ideas/${idea.id}`)} 
-                      className="hover:bg-bg-elevated/20 transition-colors cursor-pointer group"
+                    <div 
+                      key={idea.id}
+                      onClick={() => navigate(`/ideas/${idea.id}`)}
+                      className="py-4 flex flex-col gap-3.5 cursor-pointer active:bg-bg-elevated/10"
                     >
-                      <td className="px-5 py-4">
-                        <div className="font-semibold text-sm group-hover:text-primary transition-colors">{idea.title}</div>
-                        <div className="text-text-secondary/80 text-xs mt-0.5 max-w-xs sm:max-w-md truncate">{idea.description}</div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-semibold text-sm text-text-primary hover:text-primary transition-colors leading-snug">{idea.title}</span>
+                          <span className="text-[10px] text-text-secondary line-clamp-2">{idea.description}</span>
+                        </div>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-semibold border shrink-0 ${
                           idea.status === 'Approved' || idea.status === 'Completed' || idea.status === 'In Implementation' ? 'bg-success/15 border-success/20 text-success' : 
                           idea.status === 'In Review' ? 'bg-warning/15 border-warning/20 text-warning' : 
                           'bg-bg-elevated/70 text-text-secondary border-border-subtle'
                         }`}>
                           {idea.status}
                         </span>
-                      </td>
-                      <td className="px-5 py-4 flex items-center gap-2.5 mt-1.5">
-                        <img src={idea.author.avatar} alt="" className="w-6 h-6 rounded-full object-cover border border-border-subtle" />
-                        <span className="text-text-secondary">{idea.author.name.split(' ')[0]}</span>
-                      </td>
-                      <td className="px-5 py-4 text-right font-mono text-xs text-text-primary">{idea.votes}</td>
-                    </tr>
+                      </div>
+                      <div className="flex justify-between items-center gap-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          <img src={idea.author.avatar} alt="" className="w-5.5 h-5.5 rounded-full object-cover border border-border-subtle" />
+                          <span className="text-xs text-text-secondary/95">{idea.author.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-text-secondary/70 mr-1">Votes:</span>
+                          <span className="font-mono text-xs font-bold text-text-primary">{idea.votes}</span>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </>
             )}
           </div>
           <div className="p-3 border-t border-border-subtle/40 bg-bg-elevated/10 flex justify-center mt-auto">

@@ -1,37 +1,94 @@
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-bg-base: #030306;
-  --color-bg-surface: #111118;
-  --color-bg-elevated: #1d1d2b;
-  --color-border-subtle: #222233;
-  --color-border-strong: #383857;
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
   
-  --color-primary: #7c3aed;
-  --color-primary-hover: #8b5cf6;
-  --color-primary-transparent: rgba(124, 58, 237, 0.1);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-transparent: var(--primary-transparent);
   
-  --color-text-primary: #f5f5f7;
-  --color-text-secondary: #9ea0c2;
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
   
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
 
-  --font-display: "Hanken Grotesk", sans-serif;
-  --font-body: "Inter", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-display: "Geist", sans-serif;
+  --font-body: "Geist", sans-serif;
+  --font-sans: "Geist", sans-serif;
+  --font-mono: "Geist Mono", monospace;
 }
 
-@layer base {
-  body {
-    background-color: var(--color-bg-base);
-    color: var(--color-text-primary);
-    font-family: var(--font-body);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+/* Theme variables configuration */
+:root {
+  /* Dark Theme by default (original theme) */
+  --bg-base: #030306;
+  --bg-surface: #111118;
+  --bg-elevated: #1d1d2b;
+  --border-subtle: #222233;
+  --border-strong: #383857;
+  
+  /* Glowing Electric Purple accent for Dark Mode (Linear/Vercel style) */
+  --primary: #a855f7;           /* Purple 500 */
+  --primary-hover: #c084fc;     /* Purple 400 */
+  --primary-transparent: rgba(168, 85, 247, 0.15);
+  
+  --text-primary: #f5f5f7;
+  --text-secondary: #9ea0c2;
+  
+  /* Statuses in Dark Mode */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+:root.light {
+  /* Light Theme (neutral-warm surface layering) */
+  --bg-base: #f8fafc;           /* Slate 50 app background */
+  --bg-surface: #ffffff;        /* Pure white cards/sidebars for elevation contrast */
+  --bg-elevated: #f1f5f9;       /* Slate 100 inputs/dialog surfaces */
+  --border-subtle: #e2e8f0;     /* Slate 200 borders */
+  --border-strong: #cbd5e1;     /* Slate 300 active/hover borders */
+  
+  /* Vibrant Royal Purple accent for Light Mode (highly readable and interactive) */
+  --primary: #9333ea;           /* Purple 600 */
+  --primary-hover: #a855f7;     /* Purple 500 */
+  --primary-transparent: rgba(147, 51, 234, 0.08);
+  
+  --text-primary: #0f172a;      /* Slate 900 primary text */
+  --text-secondary: #475569;    /* Slate 600 secondary text */
+  
+  /* Accessible statuses in Light Mode */
+  --success: #16a34a;           /* Green 600 */
+  --warning: #d97706;           /* Amber 600 */
+  --danger: #dc2626;            /* Red 600 */
+}
+
+/* Force Geist font globally on all elements */
+body, html, input, select, textarea, button {
+  font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+code, pre, .font-mono {
+  font-family: "Geist Mono", monospace !important;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Targeted transitions on layout and container elements for smooth theme switching */
+body, html, input, select, textarea, button, .card, table, tr, td, th, aside, header, main, span, p, h1, h2, h3, h4, h5, h6 {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
 
 /* Custom Scrollbar for Dark Mode */
@@ -40,46 +97,50 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-base); 
+  background: var(--bg-base); 
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-bg-elevated); 
+  background: var(--bg-elevated); 
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-strong); 
+  background: var(--border-strong); 
 }
 
 /* Premium UI Utility Styles (Tailwind v4 style utilities) */
 @utility glass-card {
-  background: rgba(22, 22, 33, 0.78);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(124, 58, 237, 0.28);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.65), 0 0 15px -3px rgba(124, 58, 237, 0.04);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Override card transparency in Light Mode to ensure clear visual separation on Slate backdrop */
+.light .glass-card {
+  background: var(--bg-surface) !important;
+  border-color: var(--border-subtle);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 @utility glass-panel {
-  background: rgba(3, 3, 6, 0.8);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: var(--bg-base);
 }
 
 @utility glow-accent {
-  box-shadow: 0 0 35px -5px rgba(124, 58, 237, 0.12);
+  box-shadow: 0 0 35px -5px rgba(168, 85, 247, 0.15);
 }
 
 @utility glow-accent-strong {
-  box-shadow: 0 0 45px -5px rgba(124, 58, 237, 0.22);
+  box-shadow: 0 0 45px -5px rgba(168, 85, 247, 0.25);
 }
 
+/* Hover lift effect with strong purple glow shadows */
 @utility hover-lift {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.8), 0 0 25px -5px rgba(124, 58, 237, 0.3);
-    border-color: rgba(124, 58, 237, 0.55);
+    border-color: var(--primary) !important;
+    box-shadow: 0 16px 32px -10px rgba(168, 85, 247, 0.2), 0 0 20px 2px rgba(168, 85, 247, 0.12) !important;
   }
 }
 
@@ -88,9 +149,28 @@
   
   &:focus {
     outline: none;
-    border-color: var(--color-primary-hover);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
+    border-color: var(--primary-hover);
+    box-shadow: 0 0 0 3px var(--primary-transparent);
   }
+}
+
+/* Form input adjustments in Light Mode to prevent opacity washouts */
+.light input, .light select, .light textarea {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-subtle) !important;
+  color: var(--text-primary) !important;
+}
+.light input:focus, .light select:focus, .light textarea:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-transparent) !important;
+}
+
+/* Table adjustments in Light Mode for high contrast headers */
+.light thead {
+  background-color: var(--bg-elevated) !important;
+}
+.light tr:hover {
+  background-color: rgba(241, 245, 249, 0.5) !important;
 }
 
 @utility animate-pulse-glow {
@@ -99,9 +179,170 @@
 
 @keyframes pulse-glow {
   0% {
-    box-shadow: 0 0 5px rgba(124, 58, 237, 0.15);
+    box-shadow: 0 0 5px rgba(168, 85, 247, 0.2);
   }
   100% {
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.45);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
   }
+}
+
+/* Slide up and fade page transition entry animation */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Dynamic Department Badge Classes */
+.badge-iic {
+  background-color: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: rgb(196, 181, 253);
+}
+.light .badge-iic {
+  background-color: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.25);
+  color: rgb(109, 40, 217);
+}
+
+.badge-startup {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: rgb(167, 243, 208);
+}
+.light .badge-startup {
+  background-color: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: rgb(4, 120, 87);
+}
+
+.badge-events {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: rgb(253, 230, 138);
+}
+.light .badge-events {
+  background-color: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: rgb(180, 83, 9);
+}
+
+.badge-operation {
+  background-color: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: rgb(254, 205, 211);
+}
+.light .badge-operation {
+  background-color: rgba(244, 63, 94, 0.08);
+  border-color: rgba(244, 63, 94, 0.25);
+  color: rgb(190, 24, 74);
+}
+
+.badge-creative {
+  background-color: rgba(236, 72, 153, 0.1);
+  border-color: rgba(236, 72, 153, 0.3);
+  color: rgb(251, 207, 232);
+}
+.light .badge-creative {
+  background-color: rgba(236, 72, 153, 0.08);
+  border-color: rgba(236, 72, 153, 0.25);
+  color: rgb(190, 24, 93);
+}
+
+.badge-media {
+  background-color: rgba(14, 165, 233, 0.1);
+  border-color: rgba(14, 165, 233, 0.3);
+  color: rgb(186, 230, 253);
+}
+.light .badge-media {
+  background-color: rgba(14, 165, 233, 0.08);
+  border-color: rgba(14, 165, 233, 0.25);
+  color: rgb(3, 105, 161);
+}
+
+.badge-sponsorship {
+  background-color: rgba(20, 184, 166, 0.1);
+  border-color: rgba(20, 184, 166, 0.3);
+  color: rgb(153, 246, 228);
+}
+.light .badge-sponsorship {
+  background-color: rgba(20, 184, 166, 0.08);
+  border-color: rgba(20, 184, 166, 0.25);
+  color: rgb(15, 118, 110);
+}
+
+.badge-pr {
+  background-color: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: rgb(199, 210, 254);
+}
+.light .badge-pr {
+  background-color: rgba(99, 102, 241, 0.08);
+  border-color: rgba(99, 102, 241, 0.25);
+  color: rgb(67, 56, 202);
+}
+
+.badge-marketing {
+  background-color: rgba(217, 70, 239, 0.1);
+  border-color: rgba(217, 70, 239, 0.3);
+  color: rgb(245, 208, 254);
+}
+.light .badge-marketing {
+  background-color: rgba(217, 70, 239, 0.08);
+  border-color: rgba(217, 70, 239, 0.25);
+  color: rgb(162, 28, 175);
+}
+
+.badge-technical {
+  background-color: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.3);
+  color: rgb(165, 243, 252);
+}
+.light .badge-technical {
+  background-color: rgba(6, 182, 212, 0.08);
+  border-color: rgba(6, 182, 212, 0.25);
+  color: rgb(9, 109, 128);
+}
+
+.badge-documentation {
+  background-color: rgba(249, 115, 22, 0.1);
+  border-color: rgba(249, 115, 22, 0.3);
+  color: rgb(254, 215, 170);
+}
+.light .badge-documentation {
+  background-color: rgba(249, 115, 22, 0.08);
+  border-color: rgba(249, 115, 22, 0.25);
+  color: rgb(194, 65, 12);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Safe Area supports for notches and OS gesture bars */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left);
 }

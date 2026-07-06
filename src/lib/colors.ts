@@ -2,29 +2,29 @@ export const getDepartmentBadgeColor = (deptName: string): string => {
   const name = (deptName || '').toUpperCase().trim();
   switch (name) {
     case 'IIC':
-      return 'bg-violet-500/10 border-violet-500/30 text-violet-300';
+      return 'badge-iic';
     case 'STARTUP':
-      return 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300';
+      return 'badge-startup';
     case 'EVENTS':
-      return 'bg-amber-500/10 border-amber-500/30 text-amber-300';
+      return 'badge-events';
     case 'OPERATION':
-      return 'bg-rose-500/10 border-rose-500/30 text-rose-300';
+      return 'badge-operation';
     case 'CREATIVE':
-      return 'bg-pink-500/10 border-pink-500/30 text-pink-300';
+      return 'badge-creative';
     case 'MEDIA':
-      return 'bg-sky-500/10 border-sky-500/30 text-sky-300';
+      return 'badge-media';
     case 'SPONSORSHIP':
-      return 'bg-teal-500/10 border-teal-500/30 text-teal-300';
+      return 'badge-sponsorship';
     case 'PR':
-      return 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300';
+      return 'badge-pr';
     case 'MARKETING':
-      return 'bg-fuchsia-500/10 border-fuchsia-500/30 text-fuchsia-300';
+      return 'badge-marketing';
     case 'TECHNICAL':
-      return 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300';
+      return 'badge-technical';
     case 'DOCUMENTATION':
-      return 'bg-orange-500/10 border-orange-500/30 text-orange-300';
+      return 'badge-documentation';
     default:
-      return 'bg-bg-elevated/70 border-border-subtle text-text-secondary';
+      return 'bg-bg-elevated/70 border border-border-subtle text-text-secondary';
   }
 };
 

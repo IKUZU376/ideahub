@@ -6,6 +6,16 @@ export function Login() {
   const { login } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const { clientX, clientY } = e;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const x = (clientX / width) - 0.5;
+    const y = (clientY / height) - 0.5;
+    setMousePos({ x, y });
+  };
 
   // Check if Supabase credentials have been provided in the environment
   const isConfigured = 
@@ -35,14 +45,32 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-bg-base flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div 
+      onMouseMove={handleMouseMove}
+      className="min-h-screen w-full bg-bg-base flex flex-col items-center justify-center p-4 relative overflow-hidden"
+    >
       {/* Background decorations */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+      <div 
+        className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none transition-transform duration-500 ease-out" 
+        style={{
+          transform: `translate(${mousePos.x * -25}px, ${mousePos.y * -25}px)`
+        }}
+      />
+      <div 
+        className="absolute top-1/4 left-1/2 w-[450px] h-[450px] bg-primary/10 rounded-full blur-3xl pointer-events-none transition-transform duration-500 ease-out animate-float" 
+        style={{
+          transform: `translate(calc(-50% + ${mousePos.x * 50}px), calc(-50% + ${mousePos.y * 50}px))`
+        }}
+      />
       
-      <div className="w-full max-w-[440px] z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+      <div 
+        className="w-full max-w-[440px] z-10 animate-in fade-in slide-in-from-bottom-8 duration-700 transition-transform duration-300 ease-out"
+        style={{
+          transform: `translate(${mousePos.x * 12}px, ${mousePos.y * 12}px)`
+        }}
+      >
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-xl shadow-primary/20 mb-4 animate-bounce duration-[2000ms]">
+          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-xl shadow-primary/20 mb-4 animate-float">
             <Lightbulb size={24} className="fill-current" />
           </div>
           <h1 className="font-display text-3xl font-bold tracking-tight text-text-primary">IdeaHub</h1>
@@ -50,7 +78,7 @@ export function Login() {
         </div>
 
         <div className="bg-bg-surface border border-border-subtle rounded-2xl p-8 shadow-2xl relative">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-primary-hover rounded-t-2xl" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-primary rounded-t-2xl" />
           
           <h2 className="text-xl font-bold text-text-primary mb-2">Welcome to IdeaHub</h2>
           <p className="text-sm text-text-secondary mb-6">Log in to collaborate on club initiatives, manage reviews, and track implementation timelines.</p>

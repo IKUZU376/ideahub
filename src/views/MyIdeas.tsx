@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Filter, AlertTriangle } from 'lucide-react';
+import { Search, Filter, AlertTriangle, Plus } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { ideasService } from '../services/ideas';
 import { profilesService } from '../services/profiles';
@@ -132,8 +132,8 @@ export function MyIdeas() {
           <h2 className="font-display text-3xl font-extrabold text-text-primary tracking-tight">Explore Ideas</h2>
           <p className="text-text-secondary text-sm mt-1 leading-relaxed">Follow your club ideas through drafts, department review, collaboration, and implementation.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3.5 w-full md:w-auto">
-          <label className="flex items-center gap-1.5 text-xs text-text-secondary font-semibold cursor-pointer select-none">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 w-full md:w-auto">
+          <label className="flex items-center gap-1.5 text-xs text-text-secondary font-semibold cursor-pointer select-none py-1">
             <input 
               type="checkbox" 
               checked={onlyMyIdeas}
@@ -146,7 +146,7 @@ export function MyIdeas() {
           <select
             value={selectedDeptFilter}
             onChange={(e) => setSelectedDeptFilter(e.target.value)}
-            className="bg-bg-surface border border-border-subtle/70 hover:border-primary-hover px-3 py-1.5 rounded-xl text-xs text-text-secondary hover:text-text-primary focus:outline-none cursor-pointer font-semibold input-glow h-[32px]"
+            className="bg-bg-surface border border-border-subtle/70 hover:border-primary-hover px-3 py-1.5 rounded-xl text-xs text-text-secondary hover:text-text-primary focus:outline-none cursor-pointer font-semibold input-glow h-[32px] w-full sm:w-auto"
           >
             <option value="all">All Departments</option>
             {departments.map(d => (
@@ -154,7 +154,7 @@ export function MyIdeas() {
             ))}
           </select>
 
-          <div className="relative flex-1 md:w-60 min-w-[180px]">
+          <div className="relative w-full sm:w-60">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary/70" size={15} />
             <input 
               type="text" 
@@ -164,6 +164,13 @@ export function MyIdeas() {
               className="w-full bg-bg-surface/50 border border-border-subtle rounded-xl py-1.5 pl-10 pr-4 text-xs text-text-primary placeholder:text-text-secondary/50 input-glow transition-all"
             />
           </div>
+
+          <button
+            onClick={() => navigate('/submit')}
+            className="px-4 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer focus:outline-none shadow-md shadow-primary/10 hover-lift h-[32px] w-full sm:w-auto"
+          >
+            <Plus size={14} /> Submit Idea
+          </button>
         </div>
       </div>
 
@@ -192,8 +199,8 @@ export function MyIdeas() {
 
       {/* Idea Cards Grid */}
       {ideas.length === 0 ? (
-        <div className="text-center py-16 bg-bg-surface/30 border border-border-subtle/50 rounded-2xl glass-card">
-          <p className="text-text-secondary text-xs font-semibold mb-3">No ideas match your current filters.</p>
+        <div className="text-center py-16 bg-bg-surface border border-border-subtle/50 rounded-2xl glass-card">
+          <p className="text-text-secondary text-xs font-semibold mb-3">No proposals match your current filters.</p>
           {(searchQuery || activeTab !== 'all' || selectedDeptFilter !== 'all' || !onlyMyIdeas) ? (
             <button 
               onClick={() => { setSearchQuery(''); setActiveTab('all'); setSelectedDeptFilter('all'); setOnlyMyIdeas(true); setSearchParams({}); }}
@@ -203,10 +210,10 @@ export function MyIdeas() {
             </button>
           ) : (
             <button 
-              onClick={() => navigate('/submit-idea')}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white rounded-xl text-[10px] font-bold hover-lift transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-md shadow-primary/10 font-body"
+              onClick={() => navigate('/submit')}
+              className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-[10px] font-bold transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-md shadow-primary/10 font-body"
             >
-              Submit Your First Idea
+              Submit Idea
             </button>
           )}
         </div>
